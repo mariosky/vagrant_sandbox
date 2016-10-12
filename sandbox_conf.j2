@@ -1,0 +1,5 @@
+[program:worker_manager]
+command = /usr/bin/python "/home/sandbox/worker_manager.py" ; Command to start app
+stdout_logfile = /home/sandbox/worker_supervisor.log ; Where to write log messages
+redirect_stderr = true ; Save stderr in the same log
+environment=REDIS_HOST="{{redis_host}}",REDIS_PORT="{{redis_port}}"

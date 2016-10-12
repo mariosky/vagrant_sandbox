@@ -1,0 +1,39 @@
+- hosts: all
+  vars_files:
+    - vars/external_vars.yml
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  tasks:
+    - name: Install Dependencies
+      apt: name={{ item }} state=present
+      with_items:
+       - build-essential
+       - tcl8.5 
+       - make
+    - name: Download redis latest stable 
+      get_url: url=http://download.redis.io/redis-stable.tar.gz dest=/tmp
+
+    - name: Untar Redis
+      command: chdir=/tmp creates=redis-stable tar -xzf redis-stable.tar.gz
+
+    - name: Install Redis
+      command: creates=/usr/local/bin/redis-server chdir=/tmp/redis-stable make install
+
+    - name: Create user redis
+      user: name=redis system=yes home=/var/lib/redis shell=/bin/false
+
+    - name: Configure Upstart for Redis
+      template: src=redis_conf.j2 dest=/etc/init/redis.conf 
+
+    - name: Start Redis in UNPROTECTED MODE
+      command: redis-server  /etc/init/redis.conf
+      async: 45
+      poll: 0
+
+
+     
+
+
+
